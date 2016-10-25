@@ -1,0 +1,16 @@
+{
+    "dbs": 
+    [
+        {
+            "db-name" : "PruebaAC",
+            "data" :
+            {
+                "userName" : "actividadcom",
+                "passWord":"123456",
+                "server":"mlab.com",
+                "port": 35573,
+                "db":"prueba"
+            }
+        }
+    ]
+}
