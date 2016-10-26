@@ -2,14 +2,14 @@
     "dbs": 
     [
         {
-            "db-name" : "PruebaAC",
+            "db-name" : "TVInteractiva",
             "data" :
             {
-                "userName" : "actividadcom",
+                "userName" : "tvinteractiva",
                 "passWord":"123456",
                 "server":"mlab.com",
-                "port": 35573,
-                "db":"prueba"
+                "port": 53312,
+                "db":"tvinteractiva"
             }
         }
     ]

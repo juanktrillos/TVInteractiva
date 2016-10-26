@@ -2,13 +2,7 @@
 package com.jkt.tv.main;
 
 import com.oag.servicio.mongolib.driven.MongoHandler;
-import java.awt.image.BufferedImage;
 import java.net.UnknownHostException;
-import java.util.LinkedList;
-import com.jkt.tv.data.Articulo;
-import com.jkt.tv.data.Imagen;
-import com.jkt.tv.data.Persona;
-import com.jkt.tv.data.Personaje;
 
 /**
  *
