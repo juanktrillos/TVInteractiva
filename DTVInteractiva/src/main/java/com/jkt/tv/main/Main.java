@@ -1,15 +1,17 @@
-
 package com.jkt.tv.main;
 
-import com.oag.servicio.mongolib.driven.MongoHandler;
+//import com.oag.servicio.mongolib.driven.MongoHandler;
+import com.jkt.lib.driven.MongoHandler;
+import com.jkt.tv.data.Articulo;
 import java.net.UnknownHostException;
+import java.util.LinkedList;
 
 /**
  *
  * @author olarguz
+ * @author juan.trillos
  */
-public class Main 
-{
+public class Main {
 
     /**
      * @param args the command line arguments
@@ -17,24 +19,33 @@ public class Main
      */
     public static void main(String[] args) throws UnknownHostException {
         MongoHandler mongoHandler = new MongoHandler("TVInteractiva");
+
+        //Input/Output Arduino
         
+        //Manipulacion de la Base de Datos en MongoDB
+        insertInDB(mongoHandler);
+        updateInDB(mongoHandler);
+        showFromDB(mongoHandler);
+    }
+
+    public static void insertInDB(MongoHandler mongoHandler) {
+
+        mongoHandler.insert(new Articulo("ID:Prueba"));
+
 //        mongoHandler.insert( new Articulo("Bus", "MC-R45GF-AS45HN", 2001));
 //        mongoHandler.insert( new Persona("Jessica Robayo", 19, "Ing. Mecatronica", "2130520"));
 //        mongoHandler.insert( new Persona("Daniel Zamora", 19, "Ing. Multimedia", "2130400"));
 //        mongoHandler.insert( new Personaje("A4","Avatar2","Stand",new Vector(-1.5,10,0), new Vector(1, 0, 0)));
 //        mongoHandler.insert( new Pregunta("Facil","Cuantos  ......."));
 
-//        CriterioActualizacion criterioActualizacion = new CriterioActualizacion();
-//        criterioActualizacion.setCriterio(Persona.IDENTIFICACION, "888181818");
-//        criterioActualizacion.setNuevoValor(Persona.EDAD, 44);
-//        mongoHandler.update( Persona.class, criterioActualizacion);
-
 //        BufferedImage img = new BufferedImage(300, 50, BufferedImage.TYPE_INT_ARGB);
 //        Imagen imagenA = new Imagen("cuadro.png", "PNG", img);
 //        mongoHandler.insert( imagenA);
+    }
 
-//        LinkedList<Persona> personas = (LinkedList<Persona>) mongoHandler.findAll(Persona.class);
-//        LinkedList<Articulo> articulos = (LinkedList<Articulo>) mongoHandler.findAll(Articulo.class);
+    private static void showFromDB(MongoHandler mongoHandler) {
+        //        LinkedList<Persona> personas = (LinkedList<Persona>) mongoHandler.findAll(Persona.class);
+        LinkedList<Articulo> articulos = (LinkedList<Articulo>) mongoHandler.findAll(Articulo.class);
 //        LinkedList<Personaje> personajes =(LinkedList<Personaje>) mongoHandler.findAll(Personaje.class);
 //        LinkedList<Imagen> imagenes = (LinkedList<Imagen>) mongoHandler.findAll(Imagen.class);
 //        
@@ -42,10 +53,9 @@ public class Main
 //        {
 //            System.out.println(persona.toString());
 //        });
-//        articulos.stream().forEach((articulo) ->
-//        {
-//            System.out.println(articulo.toString());
-//        });
+        articulos.stream().forEach((articulo) -> {
+            System.out.println(articulo.toString());
+        });
 //        personajes.stream().forEach((personaje) ->
 //        {
 //            System.out.println(personaje.toString());
@@ -73,5 +83,13 @@ public class Main
 //        {
 //            System.out.println(persona.toString());
 //        });
+    }
+
+    private static void updateInDB(MongoHandler mongoHandler) {
+      
+//        CriterioActualizacion criterioActualizacion = new CriterioActualizacion();
+//        criterioActualizacion.setCriterio(Persona.IDENTIFICACION, "888181818");
+//        criterioActualizacion.setNuevoValor(Persona.EDAD, 44);
+//        mongoHandler.update( Persona.class, criterioActualizacion);
     }
 }

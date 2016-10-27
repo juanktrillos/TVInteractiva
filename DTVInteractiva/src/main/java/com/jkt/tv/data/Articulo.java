@@ -10,9 +10,7 @@ import java.util.Set;
  */
 public class Articulo extends BasicDBObject
 {
-    public static final String NOMBRE = "nombre";
-    public static final String REFERENCIA = "referencia";
-    public static final String MODELO = "modelo";
+    public static final String ID = "id";
 
     private boolean partial;
     
@@ -22,11 +20,9 @@ public class Articulo extends BasicDBObject
     }
     
     @SuppressWarnings("OverridableMethodCallInConstructor")
-    public Articulo (String nombre, String referencia, int Modelo)
+    public Articulo (String id)
     {
-        this.put(Articulo.NOMBRE, nombre);
-        this.put(Articulo.REFERENCIA, referencia);
-        this.put(Articulo.MODELO, Modelo);
+        this.put(Articulo.ID, id);
         
         this.markAsPartialObject();
     }
@@ -37,28 +33,15 @@ public class Articulo extends BasicDBObject
         set.remove("_id");
         
         Set<String> setThis = new HashSet<>();
-        setThis.add(NOMBRE);
-        setThis.add(REFERENCIA);
-        setThis.add(MODELO);
+        setThis.add(ID);
         
         partial =  !set.equals(setThis);
     }
     
-    public String getNombre ()
+    public String getID ()
     {
-        return this.getString(Articulo.NOMBRE);
+        return this.getString(Articulo.ID);
     }
-
-    public String getReferencia ()
-    {
-        return this.getString(Articulo.REFERENCIA);
-    }
-
-    public String getModelo ()
-    {
-        return this.getString(Articulo.MODELO);
-    }
-
     @Override
     public boolean isPartialObject() {
         return partial;
@@ -84,10 +67,8 @@ public class Articulo extends BasicDBObject
             return false;
         }
         final Articulo other = (Articulo) obj;
-        boolean cn = getNombre().equals(other.getNombre());
-        boolean cr = getReferencia().equals(other.getReferencia());
-        boolean cm = getModelo().equals(other.getModelo());
-        return cn && cr && cm;
+        boolean cn = getID().equals(other.getID());
+        return cn;
     }
     
 }
