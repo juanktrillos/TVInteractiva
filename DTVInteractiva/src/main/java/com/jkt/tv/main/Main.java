@@ -3,30 +3,45 @@ package com.jkt.tv.main;
 //import com.oag.servicio.mongolib.driven.MongoHandler;
 import com.jkt.lib.driven.MongoHandler;
 import com.jkt.tv.data.Articulo;
+import com.panamahitek.PanamaHitek_Arduino;
+import gnu.io.SerialPortEvent;
+import gnu.io.SerialPortEventListener;
 import java.net.UnknownHostException;
 import java.util.LinkedList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author olarguz
  * @author juan.trillos
  */
-public class Main {
+public class Main implements SerialPortEventListener {
 
     /**
      * @param args the command line arguments
-     * @throws java.net.UnknownHostException
      */
-    public static void main(String[] args) throws UnknownHostException {
-        MongoHandler mongoHandler = new MongoHandler("TVInteractiva");
+    public static void main(String[] args) {
+        MongoHandler mongoHandler;
+        Arduino arduino;
+        String SerialPort = "COM11";
+        try {
+            //conexion con la base de datos
+//            mongoHandler = new MongoHandler("TVInteractiva");
 
-        //Input/Output Arduino
-        
-        //Manipulacion de la Base de Datos en MongoDB
-        insertInDB(mongoHandler);
-        updateInDB(mongoHandler);
-        showFromDB(mongoHandler);
+            //Input/Output Arduino
+            arduino = new Arduino(SerialPort);
+
+            //Manipulacion de la Base de Datos en MongoDB
+//            insertInDB(mongoHandler);
+//            updateInDB(mongoHandler);
+//            showFromDB(mongoHandler);
+        } catch (Exception ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
+    
+    
 
     public static void insertInDB(MongoHandler mongoHandler) {
 
@@ -37,7 +52,6 @@ public class Main {
 //        mongoHandler.insert( new Persona("Daniel Zamora", 19, "Ing. Multimedia", "2130400"));
 //        mongoHandler.insert( new Personaje("A4","Avatar2","Stand",new Vector(-1.5,10,0), new Vector(1, 0, 0)));
 //        mongoHandler.insert( new Pregunta("Facil","Cuantos  ......."));
-
 //        BufferedImage img = new BufferedImage(300, 50, BufferedImage.TYPE_INT_ARGB);
 //        Imagen imagenA = new Imagen("cuadro.png", "PNG", img);
 //        mongoHandler.insert( imagenA);
@@ -86,10 +100,15 @@ public class Main {
     }
 
     private static void updateInDB(MongoHandler mongoHandler) {
-      
+
 //        CriterioActualizacion criterioActualizacion = new CriterioActualizacion();
 //        criterioActualizacion.setCriterio(Persona.IDENTIFICACION, "888181818");
 //        criterioActualizacion.setNuevoValor(Persona.EDAD, 44);
 //        mongoHandler.update( Persona.class, criterioActualizacion);
+    }
+
+    @Override
+    public void serialEvent(SerialPortEvent ev) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

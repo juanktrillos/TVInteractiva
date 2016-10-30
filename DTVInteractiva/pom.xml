@@ -13,9 +13,9 @@
             <type>jar</type>
         </dependency>
         <dependency>
-            <groupId>org.scream3r</groupId>
-            <artifactId>jssc</artifactId>
-            <version>2.8.0</version>
+            <groupId>com.jkt.lib</groupId>
+            <artifactId>PanamaHitek_Arduino</artifactId>
+            <version>2.7.2</version>
         </dependency>
     </dependencies>
     <properties>
