@@ -17,6 +17,11 @@
             <artifactId>PanamaHitek_Arduino</artifactId>
             <version>2.7.2</version>
         </dependency>
+        <dependency>
+            <groupId>org.facebook4j</groupId>
+            <artifactId>facebook4j-core</artifactId>
+            <version>2.4.7</version>
+        </dependency>
     </dependencies>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

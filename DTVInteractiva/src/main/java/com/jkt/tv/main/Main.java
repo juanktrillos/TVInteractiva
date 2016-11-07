@@ -1,53 +1,73 @@
 package com.jkt.tv.main;
 
 //import com.oag.servicio.mongolib.driven.MongoHandler;
+import com.jkt.tv.data.Arduino;
 import com.jkt.lib.driven.MongoHandler;
-import com.jkt.tv.data.Articulo;
-import com.panamahitek.PanamaHitek_Arduino;
-import gnu.io.SerialPortEvent;
-import gnu.io.SerialPortEventListener;
-import java.net.UnknownHostException;
+import com.jkt.tv.data.FacebookApp;
+import facebook4j.Facebook;
+import facebook4j.FacebookException;
+import facebook4j.FacebookFactory;
+import facebook4j.auth.AccessToken;
 import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import facebook4j.conf.ConfigurationBuilder;
 
 /**
  *
  * @author olarguz
  * @author juan.trillos
  */
-public class Main implements SerialPortEventListener {
+public class Main {
 
     /**
-     * @param args the command line arguments
      */
-    public static void main(String[] args) {
+    public static void mains() {
         MongoHandler mongoHandler;
-        Arduino arduino;
-        String SerialPort = "COM11";
-        try {
-            //conexion con la base de datos
-//            mongoHandler = new MongoHandler("TVInteractiva");
 
-            //Input/Output Arduino
-            arduino = new Arduino(SerialPort);
+        //<editor-fold defaultstate="collapsed" desc="Arduino">
+       /* Arduino arduino;
+         String SerialPort = "COM11";
 
-            //Manipulacion de la Base de Datos en MongoDB
-//            insertInDB(mongoHandler);
-//            updateInDB(mongoHandler);
-//            showFromDB(mongoHandler);
-        } catch (Exception ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-        }
+         //conexion con la base de datos
+         //            mongoHandler = new MongoHandler("TVInteractiva");
+         //Input/Output Arduino
+         arduino = new Arduino(SerialPort);
+
+         //Manipulacion de la Base de Datos en MongoDB
+         //            insertInDB(mongoHandler);
+         //            updateInDB(mongoHandler);
+         //            showFromDB(mongoHandler);*/
+//</editor-fold>
+        //<editor-fold defaultstate="collapsed" desc="Facebook">
+        /*ConfigurationBuilder cb = new ConfigurationBuilder();
+         cb.setDebugEnabled(true);
+         cb.setOAuthAppId("1297407430303696");
+         cb.setOAuthAppSecret("4dde7175e1787be7c61337ffeaf3ad21");
+         cb.setOAuthAccessToken("EAACEdEose0cBAJx4DiDH5ZAw11sESVo"
+         + "ICCU8JklZAOrYujtmZAGVoOZCgJtH9PWPMKWVdAz7r26f"
+         + "NFBUcDt8yO9F35RM9uZAdDmHIJnHu6VtuIBulLSKexXvp"
+         + "b3ZChxamfHi8AErpqlykzrdeX5bxlhinnSKZBdpJZCVxu"
+         + "wuYsaZBDAZDZD");
+         cb.setOAuthPermissions("email,publish_stream,...");
+         FacebookFactory ff = new FacebookFactory(cb.build());
+         Facebook face = ff.getInstance();
+         AccessToken a = face.getOAuthAccessToken();
+         System.out.println(a.toString());
+        
+         try {
+         face.postStatusMessage("Publish Test");
+         } catch (FacebookException ex) {
+         Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+         }*/
+//</editor-fold>
     }
-    
-    
 
     public static void insertInDB(MongoHandler mongoHandler) {
 
-        mongoHandler.insert(new Articulo("ID:Prueba"));
+        mongoHandler.insert(new FacebookApp(null, null, null));
 
-//        mongoHandler.insert( new Articulo("Bus", "MC-R45GF-AS45HN", 2001));
+//        mongoHandler.insert( new FacebookApp("Bus", "MC-R45GF-AS45HN", 2001));
 //        mongoHandler.insert( new Persona("Jessica Robayo", 19, "Ing. Mecatronica", "2130520"));
 //        mongoHandler.insert( new Persona("Daniel Zamora", 19, "Ing. Multimedia", "2130400"));
 //        mongoHandler.insert( new Personaje("A4","Avatar2","Stand",new Vector(-1.5,10,0), new Vector(1, 0, 0)));
@@ -59,7 +79,7 @@ public class Main implements SerialPortEventListener {
 
     private static void showFromDB(MongoHandler mongoHandler) {
         //        LinkedList<Persona> personas = (LinkedList<Persona>) mongoHandler.findAll(Persona.class);
-        LinkedList<Articulo> articulos = (LinkedList<Articulo>) mongoHandler.findAll(Articulo.class);
+        LinkedList<FacebookApp> articulos = (LinkedList<FacebookApp>) mongoHandler.findAll(FacebookApp.class);
 //        LinkedList<Personaje> personajes =(LinkedList<Personaje>) mongoHandler.findAll(Personaje.class);
 //        LinkedList<Imagen> imagenes = (LinkedList<Imagen>) mongoHandler.findAll(Imagen.class);
 //        
@@ -105,10 +125,5 @@ public class Main implements SerialPortEventListener {
 //        criterioActualizacion.setCriterio(Persona.IDENTIFICACION, "888181818");
 //        criterioActualizacion.setNuevoValor(Persona.EDAD, 44);
 //        mongoHandler.update( Persona.class, criterioActualizacion);
-    }
-
-    @Override
-    public void serialEvent(SerialPortEvent ev) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

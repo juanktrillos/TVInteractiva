@@ -50,19 +50,21 @@ void loop() {
       */
 
       // Show some details of the PICC (that is: the tag/card)
-      Serial.print(F("Card UID:"));
-      dump_byte_array(mfrc522.uid.uidByte, mfrc522.uid.size);
-      Serial.println();
+      //Serial.print(F("Card UID:"));
+      //dump_byte_array(mfrc522.uid.uidByte, mfrc522.uid.size);
+      //Serial.println();
 
       //Se transforma un String en un int array para escribir en la RFID
+      Serial.println("Writing ---------------");
       stringToInt();
       Writing();
+      data = "";
 
       /*
         //Se lee la RFID y se obtiene un int array que se transforma en un char ------------------------- se debe pasar a String.
         Reading();
         intToString();
-      Serial.print("String:   -->");Serial.println(data);
+        Serial.print("String:   -->");Serial.println(data);
       */
 
       // Halt PICC
@@ -99,46 +101,15 @@ void Writing() {
   Serial.println();
 }
 
-void Reading() {
-  MFRC522::StatusCode status;
-
-  // Show the whole sector as it currently is
-  Serial.println(F("Current data in sector:"));
-  mfrc522.PICC_DumpMifareClassicSectorToSerial(&(mfrc522.uid), &key, sector);
-  Serial.println();
-
-  // Read data from the block
-  Serial.print(F("Reading data from block ")); Serial.print(blockAddr);
-  Serial.println(F(" ..."));
-  mfrc522.MIFARE_Read(blockAddr, buffer, &size);
-  Serial.print(F("Data in block ")); Serial.print(blockAddr); Serial.println(F(":"));
-  dump_byte_array(buffer, 16); Serial.println();
-  for (int i = 0; i < 16; i++) {
-    int_array[i] = buffer[i];
-    Serial.print(int_array[i]);
-  }
-  Serial.println();
-
-}
-
 void stringToInt() {
   // Define
-  String str = "ID:JuanCamilo T";
-  int str_len = str.length();
+  data = "ID:JuanCamilo";
+  int str_len = 16;
 
   str.toCharArray(char_array, str_len);
   for (int i = 0; i < str_len; i++) {
     int_array[i] = (int)char_array[i];
   }
-}
-
-void intToString() {
-  for (int i = 0; i < 16; i++) {
-    char_array[i] = char(int_array[i]);
-    data.concat(char_array[i]);
-    Serial.print(char_array[i]);
-  }
-  Serial.println();
 }
 
 /**
