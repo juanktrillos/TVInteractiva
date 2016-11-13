@@ -6,25 +6,16 @@ import java.util.Set;
 
 /**
  * @author juan.trillos
- * @author olarguz
  */
 public class YouTubeApp extends BasicDBObject {
 
     public static final String NOMBRE = "nombre";
     public static final String EDAD = "edad";
-
+    
     private boolean partial;
 
     public YouTubeApp() {
         this.partial = true;
-    }
-
-    @SuppressWarnings("OverridableMethodCallInConstructor")
-    public YouTubeApp(String nombre, int edad) {
-        this.put(YouTubeApp.NOMBRE, nombre);
-        this.put(YouTubeApp.EDAD, edad);
-
-        this.markAsPartialObject();
     }
 
     @Override
@@ -40,8 +31,4 @@ public class YouTubeApp extends BasicDBObject {
 
     }
 
-    @Override
-    public boolean isPartialObject() {
-        return partial;
-    }
 }

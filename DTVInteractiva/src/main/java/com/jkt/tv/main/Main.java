@@ -1,32 +1,56 @@
 package com.jkt.tv.main;
 
 //import com.oag.servicio.mongolib.driven.MongoHandler;
-import com.jkt.tv.data.Arduino;
 import com.jkt.lib.driven.MongoHandler;
-import com.jkt.tv.data.FacebookApp;
-import facebook4j.Facebook;
-import facebook4j.FacebookException;
-import facebook4j.FacebookFactory;
-import facebook4j.auth.AccessToken;
+import com.jkt.tv.data.Identificador;
+import com.mongodb.BasicDBObject;
+import com.panamahitek.PanamaHitek_Arduino;
+import gnu.io.SerialPortEvent;
+import gnu.io.SerialPortEventListener;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import facebook4j.conf.ConfigurationBuilder;
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.concurrent.Worker.State;
+import javafx.scene.Scene;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
+import javafx.stage.Stage;
 
 /**
  *
  * @author olarguz
  * @author juan.trillos
  */
-public class Main {
+public class Main extends Application implements SerialPortEventListener {
+
+    private final WebView wv = new WebView();
+    private final WebEngine we = wv.getEngine();
+
+    private final String index = "index.html";
+    private final String list = "list.html";
+    private Stage stage;
+
+    private PanamaHitek_Arduino arduino;
+    private String serialPort = "";
+    private String message = "";
 
     /**
+     * @param args
      */
-    public static void mains() {
-        MongoHandler mongoHandler;
+    public static void main(String args[]) {
+
+        launch(args);
 
         //<editor-fold defaultstate="collapsed" desc="Arduino">
-       /* Arduino arduino;
+        /* Arduino arduino;
          String SerialPort = "COM11";
 
          //conexion con la base de datos
@@ -63,67 +87,104 @@ public class Main {
 //</editor-fold>
     }
 
-    public static void insertInDB(MongoHandler mongoHandler) {
+    public void connection() {
 
-        mongoHandler.insert(new FacebookApp(null, null, null));
-
-//        mongoHandler.insert( new FacebookApp("Bus", "MC-R45GF-AS45HN", 2001));
-//        mongoHandler.insert( new Persona("Jessica Robayo", 19, "Ing. Mecatronica", "2130520"));
-//        mongoHandler.insert( new Persona("Daniel Zamora", 19, "Ing. Multimedia", "2130400"));
-//        mongoHandler.insert( new Personaje("A4","Avatar2","Stand",new Vector(-1.5,10,0), new Vector(1, 0, 0)));
-//        mongoHandler.insert( new Pregunta("Facil","Cuantos  ......."));
-//        BufferedImage img = new BufferedImage(300, 50, BufferedImage.TYPE_INT_ARGB);
-//        Imagen imagenA = new Imagen("cuadro.png", "PNG", img);
-//        mongoHandler.insert( imagenA);
     }
 
-    private static void showFromDB(MongoHandler mongoHandler) {
-        //        LinkedList<Persona> personas = (LinkedList<Persona>) mongoHandler.findAll(Persona.class);
-        LinkedList<FacebookApp> articulos = (LinkedList<FacebookApp>) mongoHandler.findAll(FacebookApp.class);
-//        LinkedList<Personaje> personajes =(LinkedList<Personaje>) mongoHandler.findAll(Personaje.class);
-//        LinkedList<Imagen> imagenes = (LinkedList<Imagen>) mongoHandler.findAll(Imagen.class);
-//        
-//        personas.stream().forEach((persona) ->
-//        {
-//            System.out.println(persona.toString());
-//        });
-        articulos.stream().forEach((articulo) -> {
-            System.out.println(articulo.toString());
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+
+        arduino = new PanamaHitek_Arduino();
+        stage = primaryStage;
+        List<String> ports = arduino.getSerialPorts();
+        for (String port : ports) {
+            serialPort = port;
+        }
+        arduino.arduinoRX(serialPort, 9600, this);
+        //arduino.killArduinoConnection();
+
+        Scene scene = new Scene(wv);
+        String content = read(index);
+        we.loadContent(content);
+
+        wv.setPrefSize(1080, 680);
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    @Override
+    public void stop() {
+        try {
+            arduino.killArduinoConnection();
+        } catch (Exception ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public String read(String page) {
+        StringBuilder contentBuilder = new StringBuilder();
+        try {
+            BufferedReader in = new BufferedReader(new FileReader("src/main/resources/" + page));
+            String str;
+            while ((str = in.readLine()) != null) {
+                contentBuilder.append(str);
+            }
+            in.close();
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        String content = contentBuilder.toString();
+        return content;
+    }
+
+    @Override
+    public void serialEvent(SerialPortEvent ev) {
+        if (arduino.isMessageAvailable()) {
+            String cad = arduino.printMessage();
+            message = cad;
+
+//            insertDB();
+            interactuar();
+        }
+    }
+
+    public void insertDB() {
+        try {
+            MongoHandler mongo = new MongoHandler("TVInteractiva");
+//            mongo.insert(new Identificador(message, "Perfil"));
+//            mongo.insert(new Identificador(message, "Publicar"));
+
+        } catch (UnknownHostException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public void interactuar() {
+//        try {
+//            MongoHandler mongo = new MongoHandler("TVInteractiva");
+//            LinkedList<Identificador> find = (LinkedList<Identificador>) mongo.find(Identificador.class, "id", message);
+//            
+//            for (Identificador rfid : find) {
+//                if(rfid.getTipo().equals("Perfil")){
+//                    update();
+//                }
+//            }
+//            
+//        } catch (UnknownHostException ex) {
+//            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+        update();
+    }
+
+    public void update() {
+
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                we.loadContent(read(list));
+            }
         });
-//        personajes.stream().forEach((personaje) ->
-//        {
-//            System.out.println(personaje.toString());
-//        });
-//        imagenes.stream().forEach((imagen) ->
-//        {
-//            BufferedImage bi = imagen.getImage();
-//            System.out.println(imagen.getNombre() + " " + imagen.getTipo() + " " + bi.getWidth() + "x" + bi.getHeight() + "px");
-//        });
-//        System.out.println("---- Busqueda por nombre ----");
-//        LinkedList<Persona> personasNombre =(LinkedList<Persona>) mongoHandler.find(Persona.class, "nombre", "Jessica Robayo");//"nombre", "Olmedo");
-//        personasNombre.stream().forEach((persona) ->
-//        {
-//            System.out.println(persona.toString());
-//        });
-//        System.out.println("---- Busqueda por id ----");
-//        LinkedList<Persona> personasId =(LinkedList<Persona>) mongoHandler.find(Persona.class, "_id", "51ffff86e05b4f6e2807474f");//"nombre", "Olmedo");
-//        personasId.stream().forEach((persona) ->
-//        {
-//            System.out.println(persona.toString());
-//        });
-//        System.out.println("---- Busqueda por rango de edad ----");
-//        LinkedList<Persona> personasConSeleccion =(LinkedList<Persona>) mongoHandler.find(Persona.class, "edad", 10, 20);
-//        personasConSeleccion.stream().forEach((persona) ->
-//        {
-//            System.out.println(persona.toString());
-//        });
-    }
-
-    private static void updateInDB(MongoHandler mongoHandler) {
-
-//        CriterioActualizacion criterioActualizacion = new CriterioActualizacion();
-//        criterioActualizacion.setCriterio(Persona.IDENTIFICACION, "888181818");
-//        criterioActualizacion.setNuevoValor(Persona.EDAD, 44);
-//        mongoHandler.update( Persona.class, criterioActualizacion);
     }
 }

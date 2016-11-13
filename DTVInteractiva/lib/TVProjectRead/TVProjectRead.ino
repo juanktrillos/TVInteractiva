@@ -64,10 +64,10 @@ void loop() {
 
       //Se lee la RFID y se obtiene un int array que se transforma en un string
       //Serial.println("Reading --------------");
-      Reading();
-      intToString();
+     // Reading();
+      //intToString();
       //Serial.print("String:   -->");Serial.println(data);
-      data = "";
+      //data = "";
 
       // Halt PICC
       mfrc522.PICC_HaltA();
@@ -114,8 +114,9 @@ void intToString() {
 */
 void dump_byte_array(byte *buffer, byte bufferSize) {
   for (byte i = 0; i < bufferSize; i++) {
-    //Serial.print(buffer[i] < 0x10 ? " 0" : " ");
-    //Serial.print(buffer[i]);
+    Serial.print(buffer[i] < 0x10 ? " 0" : " ");
+    Serial.print(buffer[i], HEX);
   }
+  Serial.println();
 }
 

@@ -8,6 +8,7 @@ package com.jkt.tv.main;
 import com.jkt.lib.driven.MongoHandler;
 import com.jkt.tv.data.Arduino;
 import com.jkt.tv.data.FacebookApp;
+import com.jkt.tv.data.YouTubeApp;
 import com.panamahitek.PanamaHitek_Arduino;
 import facebook4j.Facebook;
 import facebook4j.FacebookException;
@@ -20,6 +21,12 @@ import java.net.UnknownHostException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
+import javafx.stage.Stage;
+import sun.launcher.resources.launcher;
 
 /**
  *
@@ -28,6 +35,9 @@ import java.util.logging.Logger;
 public class JMain extends javax.swing.JFrame implements SerialPortEventListener {
 
     PanamaHitek_Arduino arduino;
+    YouTubeApp youtube;
+
+    static String[] params;
 
     /**
      * Creates new form JMain
@@ -57,6 +67,7 @@ public class JMain extends javax.swing.JFrame implements SerialPortEventListener
         bDatabase = new javax.swing.JButton();
         bClose = new javax.swing.JButton();
         bFacebook = new javax.swing.JButton();
+        jButton1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -121,6 +132,13 @@ public class JMain extends javax.swing.JFrame implements SerialPortEventListener
             }
         });
 
+        jButton1.setText("jButton1");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -129,7 +147,9 @@ public class JMain extends javax.swing.JFrame implements SerialPortEventListener
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(cSerial, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 9, Short.MAX_VALUE)
+                .addGap(74, 74, 74)
+                .addComponent(jButton1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 75, Short.MAX_VALUE)
                 .addComponent(bDatabase)
                 .addGap(18, 18, 18)
                 .addComponent(bFacebook)
@@ -141,14 +161,19 @@ public class JMain extends javax.swing.JFrame implements SerialPortEventListener
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(cSerial)
                             .addComponent(bDatabase, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(bFacebook, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addContainerGap())
-                    .addComponent(bClose, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                        .addComponent(bClose, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))))
         );
 
         pack();
@@ -221,6 +246,10 @@ public class JMain extends javax.swing.JFrame implements SerialPortEventListener
         }
     }//GEN-LAST:event_bFacebookActionPerformed
 
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton1ActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -252,6 +281,7 @@ public class JMain extends javax.swing.JFrame implements SerialPortEventListener
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 new JMain().setVisible(true);
+                params = args;
             }
         });
     }
@@ -262,6 +292,7 @@ public class JMain extends javax.swing.JFrame implements SerialPortEventListener
     private javax.swing.JButton bFacebook;
     private javax.swing.JButton bSerial;
     private javax.swing.JComboBox cSerial;
+    private javax.swing.JButton jButton1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JTextField tSerial;
     // End of variables declaration//GEN-END:variables
