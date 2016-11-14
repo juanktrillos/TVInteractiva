@@ -3,14 +3,9 @@ package com.jkt.tv.main;
 //import com.oag.servicio.mongolib.driven.MongoHandler;
 import com.jkt.lib.driven.MongoHandler;
 import com.jkt.tv.data.Identificador;
-import com.mongodb.BasicDBObject;
 import com.panamahitek.PanamaHitek_Arduino;
 import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,7 +13,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.concurrent.Worker.State;
 import javafx.scene.Scene;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
@@ -34,13 +28,9 @@ public class Main extends Application implements SerialPortEventListener {
     private final WebView wv = new WebView();
     private final WebEngine we = wv.getEngine();
 
-    private final String index = "index.html";
-    private final String list = "list.html";
-    private Stage stage;
-
     private PanamaHitek_Arduino arduino;
     private String serialPort = "";
-    private String message = "";
+    String ident = "";
 
     /**
      * @param args
@@ -95,7 +85,6 @@ public class Main extends Application implements SerialPortEventListener {
     public void start(Stage primaryStage) throws Exception {
 
         arduino = new PanamaHitek_Arduino();
-        stage = primaryStage;
         List<String> ports = arduino.getSerialPorts();
         for (String port : ports) {
             serialPort = port;
@@ -104,12 +93,14 @@ public class Main extends Application implements SerialPortEventListener {
         //arduino.killArduinoConnection();
 
         Scene scene = new Scene(wv);
-        String content = read(index);
-        we.loadContent(content);
+//        String content = readHTML(index);
+        we.load(getClass().getResource("/index.html").toExternalForm());
+//        we.loadContent(content);
 
         wv.setPrefSize(1080, 680);
-        stage.setScene(scene);
-        stage.show();
+        primaryStage.setScene(scene);
+        primaryStage.show();
+//        initFX();
     }
 
     @Override
@@ -121,70 +112,117 @@ public class Main extends Application implements SerialPortEventListener {
         }
     }
 
-    public String read(String page) {
-        StringBuilder contentBuilder = new StringBuilder();
-        try {
-            BufferedReader in = new BufferedReader(new FileReader("src/main/resources/" + page));
-            String str;
-            while ((str = in.readLine()) != null) {
-                contentBuilder.append(str);
-            }
-            in.close();
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        String content = contentBuilder.toString();
-        return content;
+    /*public String readHTML(String page) {
+    StringBuilder contentBuilder = new StringBuilder();
+    try {
+    BufferedReader in = new BufferedReader(new FileReader("src/main/resources/" + page));
+    String str;
+    while ((str = in.readLine()) != null) {
+    contentBuilder.append(str);
     }
-
+    in.close();
+    } catch (FileNotFoundException ex) {
+    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+    } catch (IOException ex) {
+    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+    }
+    String content = contentBuilder.toString();
+    System.out.println(content);
+    return content;
+    }*/
     @Override
     public void serialEvent(SerialPortEvent ev) {
         if (arduino.isMessageAvailable()) {
             String cad = arduino.printMessage();
-            message = cad;
-
-//            insertDB();
-            interactuar();
+//            insertDB(cad);
+            interactuar(cad);
         }
     }
 
-    public void insertDB() {
+    public void insertDB(String id) {
         try {
             MongoHandler mongo = new MongoHandler("TVInteractiva");
-//            mongo.insert(new Identificador(message, "Perfil"));
-//            mongo.insert(new Identificador(message, "Publicar"));
+//            mongo.insert(new Identificador(id, "Perfil"));
+//            mongo.insert(new Identificador(id, "Publicar"));
 
         } catch (UnknownHostException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    public void interactuar() {
-//        try {
-//            MongoHandler mongo = new MongoHandler("TVInteractiva");
-//            LinkedList<Identificador> find = (LinkedList<Identificador>) mongo.find(Identificador.class, "id", message);
-//            
-//            for (Identificador rfid : find) {
-//                if(rfid.getTipo().equals("Perfil")){
-//                    update();
-//                }
-//            }
-//            
-//        } catch (UnknownHostException ex) {
-//            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-        update();
+    public void interactuar(String id) {
+
+        if (id.equals(ident)) {
+            loadList();
+        } else {
+            try {
+                MongoHandler mongo = new MongoHandler("TVInteractiva");
+                LinkedList<Identificador> find = (LinkedList<Identificador>) mongo.find(Identificador.class, ""
+                        + "id", id);
+
+                for (Identificador rfid : find) {
+                    if (rfid.getTipo().equals("Perfil")) {
+                        ident = rfid.getID();
+                        loadList();
+                    } else if (rfid.getTipo().equals("Publicar")) {
+                        ident = rfid.getID();
+                        String loc = we.getLocation();
+                        String[] split = loc.split(":");
+                        if (split[0].equals("https")) {
+                            publish();
+                        }
+                    }
+                }
+            } catch (UnknownHostException ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            }
+//        loadList();
+        }
     }
 
-    public void update() {
+    public void loadList() {
 
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                we.loadContent(read(list));
-            }
+        Platform.runLater(() -> {
+            //                we.loadContent(readHTML(list));
+            we.load(getClass().getResource("/list.html").toExternalForm());
         });
+    }
+
+    /*private void initFX() {
+    //        createScene();
+    we.getLoadWorker().stateProperty().addListener(new ChangeListener<State>() {
+    @Override
+    public void changed(ObservableValue ov, State oldState, State newState) {
+    if (newState == Worker.State.SUCCEEDED) {
+    EventListener listener = new EventListener() {
+    @Override
+    public void handleEvent(Event ev) {
+    String domEventType = ev.getType();
+    //                            System.err.println("EventType: " + domEventType);
+    if (domEventType.equals("click")) {
+    String href = ((Element) ev.getTarget()).getAttribute("href");
+    //////////////////////
+    // here do what you want with that clicked event
+    // and the content of href
+    //////////////////////
+    //                                we.loadContent(readHTML(href));
+    }
+    }
+    };
+    
+    Document doc = we.getDocument();
+    NodeList nodeList = doc.getElementsByTagName("a");
+    for (int i = 0; i < nodeList.getLength(); i++) {
+    ((EventTarget) nodeList.item(i)).addEventListener("click", listener, false);
+    //((EventTarget) nodeList.item(i)).addEventListener(EVENT_TYPE_MOUSEOVER, listener, false);
+    //((EventTarget) nodeList.item(i)).addEventListener(EVENT_TYPE_MOUSEOVER, listener, false);
+    }
+    }
+    }
+    });
+    }*/
+
+    public void publish() {
+        
     }
 }
