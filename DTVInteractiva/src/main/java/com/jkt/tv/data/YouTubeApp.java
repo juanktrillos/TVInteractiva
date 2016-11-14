@@ -30,5 +30,4 @@ public class YouTubeApp extends BasicDBObject {
         partial = !set.equals(setThis);
 
     }
-
 }

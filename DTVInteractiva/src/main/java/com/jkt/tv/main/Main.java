@@ -30,7 +30,7 @@ public class Main extends Application implements SerialPortEventListener {
 
     private PanamaHitek_Arduino arduino;
     private String serialPort = "";
-    String ident = "";
+    String ident[] = new String[2];
 
     /**
      * @param args
@@ -112,6 +112,7 @@ public class Main extends Application implements SerialPortEventListener {
         }
     }
 
+    //<editor-fold defaultstate="collapsed" desc="readBufferedHTML">
     /*public String readHTML(String page) {
     StringBuilder contentBuilder = new StringBuilder();
     try {
@@ -130,6 +131,8 @@ public class Main extends Application implements SerialPortEventListener {
     System.out.println(content);
     return content;
     }*/
+//</editor-fold>
+    
     @Override
     public void serialEvent(SerialPortEvent ev) {
         if (arduino.isMessageAvailable()) {
@@ -152,8 +155,14 @@ public class Main extends Application implements SerialPortEventListener {
 
     public void interactuar(String id) {
 
-        if (id.equals(ident)) {
+        if (id.equals(ident[0])) {
             loadList();
+        } else if (id.equals(ident[1])) {
+            String loc = we.getLocation();
+            String[] split = loc.split(":");
+            if (split[0].equals("https")) {
+                publish();
+            }
         } else {
             try {
                 MongoHandler mongo = new MongoHandler("TVInteractiva");
@@ -162,10 +171,10 @@ public class Main extends Application implements SerialPortEventListener {
 
                 for (Identificador rfid : find) {
                     if (rfid.getTipo().equals("Perfil")) {
-                        ident = rfid.getID();
+                        ident[0] = rfid.getID();
                         loadList();
                     } else if (rfid.getTipo().equals("Publicar")) {
-                        ident = rfid.getID();
+                        ident[1] = rfid.getID();
                         String loc = we.getLocation();
                         String[] split = loc.split(":");
                         if (split[0].equals("https")) {
@@ -221,8 +230,10 @@ public class Main extends Application implements SerialPortEventListener {
     }
     });
     }*/
-
+    @SuppressWarnings("ResultOfObjectAllocationIgnored")
     public void publish() {
-        
+
+        String link = we.getLocation();
+        new Publish(link);
     }
 }
