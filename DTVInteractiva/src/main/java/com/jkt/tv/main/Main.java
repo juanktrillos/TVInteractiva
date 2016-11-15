@@ -30,7 +30,7 @@ public class Main extends Application implements SerialPortEventListener {
 
     private PanamaHitek_Arduino arduino;
     private String serialPort = "";
-    String ident[] = new String[2];
+    String ident[] = new String[3];
 
     /**
      * @param args
@@ -132,7 +132,6 @@ public class Main extends Application implements SerialPortEventListener {
     return content;
     }*/
 //</editor-fold>
-    
     @Override
     public void serialEvent(SerialPortEvent ev) {
         if (arduino.isMessageAvailable()) {
@@ -163,6 +162,12 @@ public class Main extends Application implements SerialPortEventListener {
             if (split[0].equals("https")) {
                 publish();
             }
+        } else if (id.equals(ident[2])) {
+            String loc = we.getLocation();
+            String[] split = loc.split(":");
+            if (split[0].equals("https")) {
+                addVideo();
+            }
         } else {
             try {
                 MongoHandler mongo = new MongoHandler("TVInteractiva");
@@ -170,16 +175,31 @@ public class Main extends Application implements SerialPortEventListener {
                         + "id", id);
 
                 for (Identificador rfid : find) {
-                    if (rfid.getTipo().equals("Perfil")) {
-                        ident[0] = rfid.getID();
-                        loadList();
-                    } else if (rfid.getTipo().equals("Publicar")) {
-                        ident[1] = rfid.getID();
-                        String loc = we.getLocation();
-                        String[] split = loc.split(":");
-                        if (split[0].equals("https")) {
-                            publish();
+                    switch (rfid.getTipo()) {
+                        case "Perfil":
+                            ident[0] = rfid.getID();
+                            loadList();
+                            break;
+                        case "Publicar": {
+                            ident[1] = rfid.getID();
+                            String loc = we.getLocation();
+                            String[] split = loc.split(":");
+                            if (split[0].equals("https")) {
+                                publish();
+                            }
+                            break;
                         }
+                        case "AddVideo": {
+                            ident[2] = rfid.getID();
+                            String loc = we.getLocation();
+                            String[] split = loc.split(":");
+                            if (split[0].equals("https")) {
+                                addVideo();
+                            }
+                            break;
+                        }
+                        default:
+                            break;
                     }
                 }
             } catch (UnknownHostException ex) {
@@ -235,5 +255,9 @@ public class Main extends Application implements SerialPortEventListener {
 
         String link = we.getLocation();
         new Publish(link);
+    }
+
+    private void addVideo() {
+
     }
 }
