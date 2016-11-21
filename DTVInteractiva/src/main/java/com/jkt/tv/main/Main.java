@@ -1,10 +1,7 @@
 package com.jkt.tv.main;
 
-//import com.oag.servicio.mongolib.driven.MongoHandler;
 import com.jkt.lib.driven.MongoHandler;
-import com.jkt.tv.data.FacebookApp;
-import com.jkt.tv.data.Identificador;
-import com.jkt.tv.data.Perfil;
+import com.jkt.tv.data.*;
 import com.panamahitek.PanamaHitek_Arduino;
 import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
@@ -49,10 +46,6 @@ public class Main extends Application implements SerialPortEventListener {
         launch(args);
     }
 
-    public void connection() {
-
-    }
-
     @Override
     public void start(Stage primaryStage) throws Exception {
 
@@ -66,11 +59,11 @@ public class Main extends Application implements SerialPortEventListener {
         Scene scene = new Scene(wv);
         we.load(getClass().getResource("/index.html").toExternalForm());
 
-        wv.setPrefSize(1080, 680);
+        wv.setPrefSize(1300, 700);
         primaryStage.setScene(scene);
+        primaryStage.setFullScreen(true);
         primaryStage.show();
         primaryStage.setTitle("Video y Television Digital - YouTube RFID");
-//        initFX();
     }
 
     @Override
@@ -107,8 +100,8 @@ public class Main extends Application implements SerialPortEventListener {
         if (arduino.isMessageAvailable()) {
             String cad = arduino.printMessage();
 //            insertDB(cad);
-//            insertFace();
-            interaccion(cad);
+            insertFace();
+//            interaccion(cad);
         }
     }
 
@@ -157,7 +150,7 @@ public class Main extends Application implements SerialPortEventListener {
 
             String app = "1297407430303696";
             String pass = "4dde7175e1787be7c61337ffeaf3ad21";
-            String token = "EAACEdEose0cBAHYpH955v8ICTiz3xe0ZBy2KuJmm7cEdLklnZB4JSX5ZAVlqLLaDl4KHnfoBZCiOIzWZAIexmLurdZAMhmFdIKajZBodHp9KZCrRZAw7oojOP6WvrqHtlekRx8ZC06grOXUvi0aQ1AIMCaQyJ00v6wKOmLqXDu9sLMdQZDZD";
+            String token = "";
 
             mongo.insert(new FacebookApp(app, pass, token));
         } catch (UnknownHostException ex) {
@@ -195,7 +188,6 @@ public class Main extends Application implements SerialPortEventListener {
                     }
                     if (index.equals("YouTube")) {
                         index = "Music";
-                        System.out.println("listo para mod");
                         addVideo();
                     }
                 }
@@ -250,45 +242,6 @@ public class Main extends Application implements SerialPortEventListener {
         }
     }
 
-    public void interactuar(String id) {
-
-        try {
-            MongoHandler mongo = new MongoHandler("TVInteractiva");
-            LinkedList<Identificador> find = (LinkedList<Identificador>) mongo.find(Identificador.class, ""
-                    + "id", id);
-
-            for (Identificador rfid : find) {
-                switch (rfid.getTipo()) {
-                    case "Perfil":
-                        usuario = new Perfil(rfid.getID());
-//                        login();
-                        break;
-                    case "Publicar": {
-                        usuario.setIdFace(rfid.getID());
-                        String loc = we.getLocation();
-                        String[] split = loc.split(":");
-                        if (split[0].equals("https")) {
-                            publish();
-                        }
-                        break;
-                    }
-//                    case "AddVideo": {
-//                        String loc = we.getLocation();
-//                        String[] split = loc.split(":");
-//                        if (split[0].equals("https")) {
-//                            addVideo();
-//                        }
-//                        break;
-//                    }
-                    default:
-                        break;
-                }
-            }
-        } catch (UnknownHostException ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
     public void login(MongoHandler mongo) {
         Platform.runLater(() -> {
             LinkedList<Identificador> find = (LinkedList<Identificador>) mongo.find(Identificador.class, "owner", usuario.getIdPerfil());
@@ -313,44 +266,9 @@ public class Main extends Application implements SerialPortEventListener {
             we.load(getClass().getResource("/list.html").toExternalForm());
         });
     }
-
-    /*private void initFX() {
-    //        createScene();
-    we.getLoadWorker().stateProperty().addListener(new ChangeListener<State>() {
-    @Override
-    public void changed(ObservableValue ov, State oldState, State newState) {
-    if (newState == Worker.State.SUCCEEDED) {
-    EventListener listener = new EventListener() {
-    @Override
-    public void handleEvent(Event ev) {
-    String domEventType = ev.getType();
-    //                            System.err.println("EventType: " + domEventType);
-    if (domEventType.equals("click")) {
-    String href = ((Element) ev.getTarget()).getAttribute("href");
-    //////////////////////
-    // here do what you want with that clicked event
-    // and the content of href
-    //////////////////////
-    //                                we.loadContent(readHTML(href));
-    }
-    }
-    };
     
-    Document doc = we.getDocument();
-    NodeList nodeList = doc.getElementsByTagName("a");
-    for (int i = 0; i < nodeList.getLength(); i++) {
-    ((EventTarget) nodeList.item(i)).addEventListener("click", listener, false);
-    System.out.println(nodeList.item(i));
-    //((EventTarget) nodeList.item(i)).addEventListener(EVENT_TYPE_MOUSEOVER, listener, false);
-    //((EventTarget) nodeList.item(i)).addEventListener(EVENT_TYPE_MOUSEOVER, listener, false);
-    }
-    }
-    }
-    });
-    }*/
     @SuppressWarnings("ResultOfObjectAllocationIgnored")
     public void publish() {
-        we.reload();
         String link = we.getLocation();
         new Publish(link);
     }
