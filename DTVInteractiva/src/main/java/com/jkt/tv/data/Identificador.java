@@ -17,6 +17,7 @@ public class Identificador extends BasicDBObject{
 
     public static final String ID = "id";
     public static final String TIPO = "tipo";
+    public static final String OWNER = "owner";
 
     private boolean partial;
 
@@ -25,9 +26,10 @@ public class Identificador extends BasicDBObject{
     }
 
     @SuppressWarnings("OverridableMethodCallInConstructor")
-    public Identificador(String id, String tipo) {
+    public Identificador(String id, String tipo, String owner) {
         this.put(Identificador.ID, id);
         this.put(Identificador.TIPO, tipo);
+        this.put(Identificador.OWNER, owner);
 
         this.markAsPartialObject();
     }
@@ -39,6 +41,8 @@ public class Identificador extends BasicDBObject{
 
         Set<String> setThis = new HashSet<>();
         setThis.add(ID);
+        setThis.add(TIPO);
+        setThis.add(OWNER);
 
         partial = !set.equals(setThis);
     }
@@ -49,6 +53,10 @@ public class Identificador extends BasicDBObject{
 
     public String getTipo() {
         return this.getString(Identificador.TIPO);
+    }
+
+    public String getOwner() {
+        return this.getString(Identificador.OWNER);
     }
 
     @Override

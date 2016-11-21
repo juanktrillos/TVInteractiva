@@ -36,12 +36,22 @@ public class FacebookApp extends BasicDBObject {
 
         Set<String> setThis = new HashSet<>();
         setThis.add(IDUSER);
+        setThis.add(IDPASS);
+        setThis.add(TOKEN);
 
         partial = !set.equals(setThis);
     }
 
     public String getID() {
         return this.getString(FacebookApp.IDUSER);
+    }
+
+    public String getPass() {
+        return this.getString(FacebookApp.IDPASS);
+    }
+
+    public String getToken() {
+        return this.getString(FacebookApp.TOKEN);
     }
 
     @Override

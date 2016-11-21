@@ -2,7 +2,9 @@ package com.jkt.tv.main;
 
 //import com.oag.servicio.mongolib.driven.MongoHandler;
 import com.jkt.lib.driven.MongoHandler;
+import com.jkt.tv.data.FacebookApp;
 import com.jkt.tv.data.Identificador;
+import com.jkt.tv.data.Perfil;
 import com.panamahitek.PanamaHitek_Arduino;
 import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
@@ -17,6 +19,7 @@ import javafx.scene.Scene;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -30,7 +33,13 @@ public class Main extends Application implements SerialPortEventListener {
 
     private PanamaHitek_Arduino arduino;
     private String serialPort = "";
-    String ident[] = new String[3];
+    private Perfil usuario;
+    private String index;
+    private String uri = "https://www.youtube.com/embed/";
+    private String autoplay = "?autoplay=1";
+    private String videos[] = new String[]{"https://www.youtube.com/embed/LWyZSXsMAr8?autoplay=1",
+        "https://www.youtube.com/embed/CrElOTnLei0?autoplay=1", "https://www.youtube.com/embed/qIoDWTF0qSo?autoplay=1",
+        "https://youtube.com"};
 
     /**
      * @param args
@@ -38,43 +47,6 @@ public class Main extends Application implements SerialPortEventListener {
     public static void main(String args[]) {
 
         launch(args);
-
-        //<editor-fold defaultstate="collapsed" desc="Arduino">
-        /* Arduino arduino;
-         String SerialPort = "COM11";
-
-         //conexion con la base de datos
-         //            mongoHandler = new MongoHandler("TVInteractiva");
-         //Input/Output Arduino
-         arduino = new Arduino(SerialPort);
-
-         //Manipulacion de la Base de Datos en MongoDB
-         //            insertInDB(mongoHandler);
-         //            updateInDB(mongoHandler);
-         //            showFromDB(mongoHandler);*/
-//</editor-fold>
-        //<editor-fold defaultstate="collapsed" desc="Facebook">
-        /*ConfigurationBuilder cb = new ConfigurationBuilder();
-         cb.setDebugEnabled(true);
-         cb.setOAuthAppId("1297407430303696");
-         cb.setOAuthAppSecret("4dde7175e1787be7c61337ffeaf3ad21");
-         cb.setOAuthAccessToken("EAACEdEose0cBAJx4DiDH5ZAw11sESVo"
-         + "ICCU8JklZAOrYujtmZAGVoOZCgJtH9PWPMKWVdAz7r26f"
-         + "NFBUcDt8yO9F35RM9uZAdDmHIJnHu6VtuIBulLSKexXvp"
-         + "b3ZChxamfHi8AErpqlykzrdeX5bxlhinnSKZBdpJZCVxu"
-         + "wuYsaZBDAZDZD");
-         cb.setOAuthPermissions("email,publish_stream,...");
-         FacebookFactory ff = new FacebookFactory(cb.build());
-         Facebook face = ff.getInstance();
-         AccessToken a = face.getOAuthAccessToken();
-         System.out.println(a.toString());
-        
-         try {
-         face.postStatusMessage("Publish Test");
-         } catch (FacebookException ex) {
-         Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-         }*/
-//</editor-fold>
     }
 
     public void connection() {
@@ -90,16 +62,14 @@ public class Main extends Application implements SerialPortEventListener {
             serialPort = port;
         }
         arduino.arduinoRX(serialPort, 9600, this);
-        //arduino.killArduinoConnection();
 
         Scene scene = new Scene(wv);
-//        String content = readHTML(index);
         we.load(getClass().getResource("/index.html").toExternalForm());
-//        we.loadContent(content);
 
         wv.setPrefSize(1080, 680);
         primaryStage.setScene(scene);
         primaryStage.show();
+        primaryStage.setTitle("Video y Television Digital - YouTube RFID");
 //        initFX();
     }
 
@@ -137,15 +107,143 @@ public class Main extends Application implements SerialPortEventListener {
         if (arduino.isMessageAvailable()) {
             String cad = arduino.printMessage();
 //            insertDB(cad);
-            interactuar(cad);
+//            insertFace();
+            interaccion(cad);
         }
     }
 
+    //<editor-fold defaultstate="collapsed" desc="Insertar Objeto Interactivo:: 6 RFIDs">
     public void insertDB(String id) {
         try {
             MongoHandler mongo = new MongoHandler("TVInteractiva");
-//            mongo.insert(new Identificador(id, "Perfil"));
-//            mongo.insert(new Identificador(id, "Publicar"));
+            if (usuario == null) {
+                mongo.insert(new Identificador(id, "Perfil", id));
+                usuario = new Perfil(id);
+                System.out.println("Esperando ID Musica");
+            } else {
+                if (usuario.getIdMusic() == null) {
+                    mongo.insert(new Identificador(id, "Music", usuario.getIdPerfil()));
+                    usuario.setIdMusic(id);
+                    System.out.println("Esperando ID Entretenimiento");
+                } else if (usuario.getIdEnter() == null) {
+                    mongo.insert(new Identificador(id, "Entretenimiento", usuario.getIdPerfil()));
+                    usuario.setIdEnter(id);
+                    System.out.println("Esperando ID Educacion");
+                } else if (usuario.getIdEdu() == null) {
+                    mongo.insert(new Identificador(id, "Educacion", usuario.getIdPerfil()));
+                    usuario.setIdEdu(id);
+                    System.out.println("Esperando ID Facebook");
+                } else if (usuario.getIdFace() == null) {
+                    mongo.insert(new Identificador(id, "Facebook", usuario.getIdPerfil()));
+                    usuario.setIdFace(id);
+                    System.out.println("Esperando ID YouTube Page");
+                } else if (usuario.getIdYoutube() == null) {
+                    mongo.insert(new Identificador(id, "YouTube", usuario.getIdPerfil()));
+                    usuario.setIdYoutube(id);
+                    System.out.println("Terminado");
+                }
+            }
+
+        } catch (UnknownHostException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+//</editor-fold>
+
+    //<editor-fold defaultstate="collapsed" desc="Metodo Para Insertar Permisos de Facebook">
+    public void insertFace() {
+        try {
+            MongoHandler mongo = new MongoHandler("TVInteractiva");
+
+            String app = "1297407430303696";
+            String pass = "4dde7175e1787be7c61337ffeaf3ad21";
+            String token = "EAACEdEose0cBAHYpH955v8ICTiz3xe0ZBy2KuJmm7cEdLklnZB4JSX5ZAVlqLLaDl4KHnfoBZCiOIzWZAIexmLurdZAMhmFdIKajZBodHp9KZCrRZAw7oojOP6WvrqHtlekRx8ZC06grOXUvi0aQ1AIMCaQyJ00v6wKOmLqXDu9sLMdQZDZD";
+
+            mongo.insert(new FacebookApp(app, pass, token));
+        } catch (UnknownHostException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+//</editor-fold>
+
+    public void interaccion(String id) {
+        try {
+            if (usuario == null) {
+                MongoHandler mongo = new MongoHandler("TVInteractiva");
+                LinkedList<Identificador> find = (LinkedList<Identificador>) mongo.find(Identificador.class, ""
+                        + "id", id);
+                for (Identificador rfid : find) {
+                    if (rfid.getTipo().equals("Perfil")) {
+                        usuario = new Perfil(rfid.getID());
+                        index = "List";
+                        login(mongo);
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Usuario Incorrecto\n\n"
+                                + "Intentalo Nuevamente");
+                    }
+                }
+                if (find.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Usuario Incorrecto\n\n"
+                            + "Intentalo Nuevamente");
+                }
+            } else {
+
+                if (usuario.getIdMusic().equals(id)) {
+                    if (index.equals("List")) {
+                        index = "Music";
+                        loadContent();
+                    }
+                    if (index.equals("YouTube")) {
+                        index = "Music";
+                        System.out.println("listo para mod");
+                        addVideo();
+                    }
+                }
+
+                if (usuario.getIdEnter().equals(id)) {
+                    if (index.equals("List")) {
+                        index = "Enter";
+                        loadContent();
+                    }
+                    if (index.equals("YouTube")) {
+                        index = "Enter";
+                        addVideo();
+                    }
+                }
+
+                if (usuario.getIdEdu().equals(id)) {
+                    if (index.equals("List")) {
+                        index = "Edu";
+                        loadContent();
+                    }
+                    if (index.equals("YouTube")) {
+                        index = "Edu";
+                        addVideo();
+                    }
+                }
+
+                if (usuario.getIdYoutube().equals(id)) {
+                    if (index.equals("List")) {
+                        index = "YouTube";
+                        loadContent();
+                    }
+                }
+
+                if (usuario.getIdFace().equals(id)) {
+                    if (!index.equals("List")) {
+                        String loc = we.getLocation();
+                        String[] split = loc.split(":");
+                        if (split[0].equals("https")) {
+                            publish();
+                        }
+                    }
+                }
+
+                if (usuario.getIdPerfil().equals(id)) {
+                    index = "List";
+                    loadContent();
+                }
+            }
 
         } catch (UnknownHostException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
@@ -154,65 +252,64 @@ public class Main extends Application implements SerialPortEventListener {
 
     public void interactuar(String id) {
 
-        if (id.equals(ident[0])) {
-            loadList();
-        } else if (id.equals(ident[1])) {
-            String loc = we.getLocation();
-            String[] split = loc.split(":");
-            if (split[0].equals("https")) {
-                publish();
-            }
-        } else if (id.equals(ident[2])) {
-            String loc = we.getLocation();
-            String[] split = loc.split(":");
-            if (split[0].equals("https")) {
-                addVideo();
-            }
-        } else {
-            try {
-                MongoHandler mongo = new MongoHandler("TVInteractiva");
-                LinkedList<Identificador> find = (LinkedList<Identificador>) mongo.find(Identificador.class, ""
-                        + "id", id);
+        try {
+            MongoHandler mongo = new MongoHandler("TVInteractiva");
+            LinkedList<Identificador> find = (LinkedList<Identificador>) mongo.find(Identificador.class, ""
+                    + "id", id);
 
-                for (Identificador rfid : find) {
-                    switch (rfid.getTipo()) {
-                        case "Perfil":
-                            ident[0] = rfid.getID();
-                            loadList();
-                            break;
-                        case "Publicar": {
-                            ident[1] = rfid.getID();
-                            String loc = we.getLocation();
-                            String[] split = loc.split(":");
-                            if (split[0].equals("https")) {
-                                publish();
-                            }
-                            break;
+            for (Identificador rfid : find) {
+                switch (rfid.getTipo()) {
+                    case "Perfil":
+                        usuario = new Perfil(rfid.getID());
+//                        login();
+                        break;
+                    case "Publicar": {
+                        usuario.setIdFace(rfid.getID());
+                        String loc = we.getLocation();
+                        String[] split = loc.split(":");
+                        if (split[0].equals("https")) {
+                            publish();
                         }
-                        case "AddVideo": {
-                            ident[2] = rfid.getID();
-                            String loc = we.getLocation();
-                            String[] split = loc.split(":");
-                            if (split[0].equals("https")) {
-                                addVideo();
-                            }
-                            break;
-                        }
-                        default:
-                            break;
+                        break;
                     }
+//                    case "AddVideo": {
+//                        String loc = we.getLocation();
+//                        String[] split = loc.split(":");
+//                        if (split[0].equals("https")) {
+//                            addVideo();
+//                        }
+//                        break;
+//                    }
+                    default:
+                        break;
                 }
-            } catch (UnknownHostException ex) {
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
-//        loadList();
+        } catch (UnknownHostException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    public void loadList() {
-
+    public void login(MongoHandler mongo) {
         Platform.runLater(() -> {
-            //                we.loadContent(readHTML(list));
+            LinkedList<Identificador> find = (LinkedList<Identificador>) mongo.find(Identificador.class, "owner", usuario.getIdPerfil());
+            for (Identificador rfid : find) {
+                String id = rfid.getID();
+                if (rfid.getTipo().equals("Music")) {
+                    usuario.setIdMusic(id);
+                }
+                if (rfid.getTipo().equals("Entretenimiento")) {
+                    usuario.setIdEnter(id);
+                }
+                if (rfid.getTipo().equals("Educacion")) {
+                    usuario.setIdEdu(id);
+                }
+                if (rfid.getTipo().equals("Facebook")) {
+                    usuario.setIdFace(id);
+                }
+                if (rfid.getTipo().equals("YouTube")) {
+                    usuario.setIdYoutube(id);
+                }
+            }
             we.load(getClass().getResource("/list.html").toExternalForm());
         });
     }
@@ -243,6 +340,7 @@ public class Main extends Application implements SerialPortEventListener {
     NodeList nodeList = doc.getElementsByTagName("a");
     for (int i = 0; i < nodeList.getLength(); i++) {
     ((EventTarget) nodeList.item(i)).addEventListener("click", listener, false);
+    System.out.println(nodeList.item(i));
     //((EventTarget) nodeList.item(i)).addEventListener(EVENT_TYPE_MOUSEOVER, listener, false);
     //((EventTarget) nodeList.item(i)).addEventListener(EVENT_TYPE_MOUSEOVER, listener, false);
     }
@@ -252,12 +350,56 @@ public class Main extends Application implements SerialPortEventListener {
     }*/
     @SuppressWarnings("ResultOfObjectAllocationIgnored")
     public void publish() {
-
+        we.reload();
         String link = we.getLocation();
         new Publish(link);
     }
 
+    private void loadContent() {
+        Platform.runLater(() -> {
+            if (index.equals("Edu")) {
+                we.load(videos[0]);
+            }
+            if (index.equals("Enter")) {
+                we.load(videos[1]);
+            }
+            if (index.equals("Music")) {
+                we.load(videos[2]);
+            }
+            if (index.equals("YouTube")) {
+                we.load(videos[3]);
+            }
+            if (index.equals("List")) {
+                we.load(getClass().getResource("/list.html").toExternalForm());
+            }
+        });
+    }
+
     private void addVideo() {
 
+        Platform.runLater(() -> {
+            if (index.equals("Edu")) {
+                we.reload();
+                videos[0] = toAutoplay(we.getLocation());
+                we.load(videos[0]);
+            }
+            if (index.equals("Enter")) {
+                we.reload();
+                videos[1] = toAutoplay(we.getLocation());
+                we.load(videos[1]);
+            }
+            if (index.equals("Music")) {
+                we.reload();
+                videos[2] = toAutoplay(we.getLocation());
+                we.load(videos[2]);
+            }
+        });
+    }
+    
+    public String toAutoplay(String url){
+        
+        @SuppressWarnings("MismatchedReadAndWriteOfArray")
+        String[] split = url.split("=");
+        return uri.concat(split[1].concat(autoplay));
     }
 }

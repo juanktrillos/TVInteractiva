@@ -5,13 +5,18 @@
  */
 package com.jkt.tv.main;
 
+import com.jkt.lib.driven.MongoHandler;
+import com.jkt.tv.data.FacebookApp;
 import facebook4j.Facebook;
 import facebook4j.FacebookException;
 import facebook4j.FacebookFactory;
 import facebook4j.conf.ConfigurationBuilder;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.UnknownHostException;
+import java.util.LinkedList;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -28,13 +33,14 @@ public class Publish extends javax.swing.JFrame {
 
     /**
      * Creates new form Publish
+     *
      * @param link
      */
     @SuppressWarnings("OverridableMethodCallInConstructor")
     public Publish(String link) {
         initComponents();
         areaLink.setText(link);
-        
+
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.setVisible(true);
     }
@@ -165,33 +171,42 @@ public class Publish extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
-        String link = areaLink.getText();
-        String comment = areaComment.getText();
-        
-        String appid="1297407430303696";
-        String appscret = "4dde7175e1787be7c61337ffeaf3ad21";
-        String acctoken = "EAACEdEose0cBAOpZB3hv4B35XRz1vGWBGjokBbCGAKYnBlRkkxP"
-                + "OFVjFQ8N6JHYtRKr2WnjJOarHw2zNOu0icPuBfZBOlBDRrafAXZBHZAgWwuE"
-                + "rCMjfUc2hQCmhVzsB376RwBdEbRC6S9FlEbFbhITQXxtZAb8mJheCGZAiBDX"
-                + "QZDZD";
-
-        ConfigurationBuilder cb = new ConfigurationBuilder();
-        cb.setDebugEnabled(true);
-        cb.setOAuthAppId(appid);
-        cb.setOAuthAppSecret(appscret);
-        cb.setOAuthAccessToken(acctoken);
-        cb.setOAuthPermissions("email,publish_stream,...");
-        
-        FacebookFactory ff = new FacebookFactory(cb.build());
-        Facebook face = ff.getInstance();
-
         try {
-            face.postStatusMessage("Publish Test");
-            face.postLink(new URL(link), comment);
-            this.dispose();
-        } catch (FacebookException | MalformedURLException ex) {
-            java.util.logging.Logger.getLogger(Publish.class.getName()).log(Level.SEVERE, null, ex);
+            // TODO add your handling code here:
+            String link = areaLink.getText();
+            String comment = areaComment.getText();
+
+            String appid = "1297407430303696";
+
+            MongoHandler mongo = new MongoHandler("TVInteractiva");
+            LinkedList<FacebookApp> find = (LinkedList<FacebookApp>) mongo.find(FacebookApp.class, "idUser", appid);
+            String appscret="";
+            String acctoken="";
+            for (FacebookApp book : find) {
+
+                appscret = book.getPass();
+                acctoken = book.getToken();
+            }
+
+            ConfigurationBuilder cb = new ConfigurationBuilder();
+            cb.setDebugEnabled(true);
+            cb.setOAuthAppId(appid);
+            cb.setOAuthAppSecret(appscret);
+            cb.setOAuthAccessToken(acctoken);
+            cb.setOAuthPermissions("email,publish_stream,...");
+
+            FacebookFactory ff = new FacebookFactory(cb.build());
+            Facebook face = ff.getInstance();
+
+            try {
+                face.postStatusMessage("YouTube RFID Interaction");
+                face.postLink(new URL(link), comment);
+                this.dispose();
+            } catch (FacebookException | MalformedURLException ex) {
+                java.util.logging.Logger.getLogger(Publish.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } catch (UnknownHostException ex) {
+            Logger.getLogger(Publish.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_jButton1ActionPerformed
 
